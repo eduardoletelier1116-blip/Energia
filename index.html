@@ -519,6 +519,168 @@
       cursor: not-allowed;
     }
 
+
+    .monitor-card {
+      overflow: hidden;
+    }
+
+    .period-tabs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 16px;
+      padding: 5px;
+      border-radius: 15px;
+      background: var(--primary-soft);
+      border: 1px solid #dfe8f0;
+    }
+
+    .period-btn {
+      min-height: 42px;
+      border: 0;
+      border-radius: 11px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+    }
+
+    .period-btn.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 4px 12px rgba(30, 55, 75, 0.10);
+    }
+
+    .month-selector {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 9px;
+      align-items: end;
+      margin-top: 13px;
+    }
+
+    .month-selector.hidden {
+      display: none;
+    }
+
+    .month-selector .field {
+      margin-top: 0;
+    }
+
+    .month-selector input {
+      min-height: 44px;
+    }
+
+    .month-btn {
+      min-height: 44px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: 13px;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .period-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 17px;
+    }
+
+    .period-title {
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .period-count {
+      flex: 0 0 auto;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 0.62rem;
+      font-weight: 800;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 300px;
+      margin-top: 14px;
+      padding: 10px 4px 2px;
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      background: #ffffff;
+    }
+
+    .chart-state {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      border-radius: 17px;
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .chart-state.hidden {
+      display: none;
+    }
+
+    .monitor-summary {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+    .monitor-kpi {
+      min-width: 0;
+      padding: 12px 10px;
+      border-radius: 15px;
+      background: var(--primary-soft);
+      border: 1px solid #dfe8f0;
+      text-align: center;
+    }
+
+    .monitor-kpi-label {
+      color: var(--muted);
+      font-size: 0.58rem;
+      font-weight: 700;
+      line-height: 1.35;
+      text-transform: uppercase;
+    }
+
+    .monitor-kpi-value {
+      margin-top: 5px;
+      color: var(--primary);
+      font-size: 1rem;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .monitor-note {
+      margin-top: 11px;
+      color: var(--muted);
+      font-size: 0.62rem;
+      line-height: 1.5;
+      text-align: center;
+    }
+
     .spinner {
       width: 17px;
       height: 17px;
@@ -595,6 +757,18 @@
 
       .page-btn {
         min-width: 78px;
+      }
+
+      .month-selector {
+        grid-template-columns: 1fr;
+      }
+
+      .month-btn {
+        width: 100%;
+      }
+
+      .chart-wrap {
+        height: 275px;
       }
     }
   </style>
@@ -756,55 +930,83 @@
         </div>
       </article>
 
-      <details class="card history-card" open>
-        <summary>
-          <span>Historial de registros</span>
-          <span class="summary-arrow">⌄</span>
-        </summary>
+      <article class="card monitor-card">
+        <h2 class="card-title">Consumo diario</h2>
+        <p class="card-description">
+          Revisa el consumo activo y reactivo de los últimos 30 días o consulta
+          un mes específico.
+        </p>
 
-        <div class="history-content">
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Hora</th>
-                  <th>Operador</th>
-                  <th>Activa acum.</th>
-                  <th>Reactiva acum.</th>
-                  <th>Consumo activo</th>
-                  <th>Consumo reactivo</th>
-                  <th>Factor de potencia</th>
-                  <th>Observaciones</th>
-                </tr>
-              </thead>
-              <tbody id="tablaRegistros">
-                <tr>
-                  <td class="empty" colspan="9">Cargando registros…</td>
-                </tr>
-              </tbody>
-            </table>
+        <div class="period-tabs" role="group" aria-label="Período del gráfico">
+          <button id="btnUltimos30" class="period-btn active" type="button">
+            Últimos 30 días
+          </button>
+          <button id="btnElegirMes" class="period-btn" type="button">
+            Mes específico
+          </button>
+        </div>
+
+        <div id="selectorMes" class="month-selector hidden">
+          <div class="field">
+            <label for="mesConsulta">Mes a consultar</label>
+            <input id="mesConsulta" type="month" />
           </div>
+          <button id="btnVerMes" class="month-btn" type="button">Ver mes</button>
+        </div>
 
-          <div class="pagination">
-            <button id="btnAnterior" class="page-btn" type="button">Anterior</button>
-            <div id="infoPagina" class="page-info">Página 1 de 1</div>
-            <button id="btnSiguiente" class="page-btn" type="button">Siguiente</button>
+        <div class="period-heading">
+          <div id="tituloPeriodo" class="period-title">Últimos 30 días</div>
+          <div id="cantidadRegistrosGrafico" class="period-count">0 lecturas</div>
+        </div>
+
+        <div class="chart-wrap">
+          <canvas id="graficoConsumo" aria-label="Gráfico de consumo diario"></canvas>
+          <div id="estadoGrafico" class="chart-state">
+            Cargando datos del consumo…
           </div>
         </div>
-      </details>
+
+        <div class="monitor-summary">
+          <div class="monitor-kpi">
+            <div class="monitor-kpi-label">Consumo activo total</div>
+            <div id="totalActivoPeriodo" class="monitor-kpi-value">—</div>
+          </div>
+
+          <div class="monitor-kpi">
+            <div class="monitor-kpi-label">Consumo reactivo total</div>
+            <div id="totalReactivoPeriodo" class="monitor-kpi-value">—</div>
+          </div>
+
+          <div class="monitor-kpi">
+            <div class="monitor-kpi-label">Promedio activo diario</div>
+            <div id="promedioActivoPeriodo" class="monitor-kpi-value">—</div>
+          </div>
+
+          <div class="monitor-kpi">
+            <div class="monitor-kpi-label">Factor de potencia promedio</div>
+            <div id="promedioFactorPeriodo" class="monitor-kpi-value">—</div>
+          </div>
+        </div>
+
+        <div class="monitor-note">
+          Los días sin lectura permanecen vacíos. El consumo se calcula con la
+          diferencia entre la lectura del día y la lectura anterior.
+        </div>
+      </article>
+
     </section>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyFyWjAnYvA7MNDr5UppyOJoLQ_cvBI2gdou5N51nEd6ilB_t5IsD6nUStFcTOJC24-tQ/exec";
     const STORAGE_KEY = "energia_operador";
-    const REGISTROS_POR_PAGINA = 5;
 
     let operador = "";
-    let registros = [];
     let ultimaLectura = null;
-    let paginaActual = 1;
+    let graficoConsumo = null;
+    let modoPeriodo = "ultimos30";
 
     const $ = (id) => document.getElementById(id);
 
@@ -815,10 +1017,20 @@
       $("nombreOperador").addEventListener("keydown", (event) => {
         if (event.key === "Enter") ingresarOperador();
       });
+
       $("btnCambiarOperador").addEventListener("click", cambiarOperador);
       $("registroForm").addEventListener("submit", guardarLectura);
-      $("btnAnterior").addEventListener("click", () => cambiarPagina(-1));
-      $("btnSiguiente").addEventListener("click", () => cambiarPagina(1));
+
+      $("btnUltimos30").addEventListener("click", seleccionarUltimos30);
+      $("btnElegirMes").addEventListener("click", seleccionarMes);
+      $("btnVerMes").addEventListener("click", cargarGraficoMes);
+      $("mesConsulta").addEventListener("change", () => {
+        if (modoPeriodo === "mes" && $("mesConsulta").value) {
+          cargarGraficoMes();
+        }
+      });
+
+      $("mesConsulta").value = obtenerMesActual();
 
       operador = localStorage.getItem(STORAGE_KEY) || "";
       comprobarConexion();
@@ -834,21 +1046,19 @@
       const estado = $("estadoConexion");
 
       try {
-        const response = await fetch(
-          `${SCRIPT_URL}?action=estado&t=${Date.now()}`,
-          { cache: "no-store" }
+        const data = await obtenerJSON(
+          `${SCRIPT_URL}?action=estado&t=${Date.now()}`
         );
 
-        if (!response.ok) throw new Error("No se pudo contactar el servidor.");
-
-        const data = await response.json();
         if (!data.ok) throw new Error(data.error || "La API respondió con un error.");
 
         estado.className = "connection ok";
-        estado.innerHTML = '<span class="connection-dot"></span><span>Conectado</span>';
+        estado.innerHTML =
+          '<span class="connection-dot"></span><span>Conectado</span>';
       } catch (error) {
         estado.className = "connection error";
-        estado.innerHTML = '<span class="connection-dot"></span><span>Sin conexión</span>';
+        estado.innerHTML =
+          '<span class="connection-dot"></span><span>Sin conexión</span>';
       }
     }
 
@@ -856,7 +1066,11 @@
       const nombre = $("nombreOperador").value.trim().replace(/\s+/g, " ");
 
       if (nombre.length < 2) {
-        mostrarMensaje("mensajeLogin", "Ingresa un nombre de operador válido.", "error");
+        mostrarMensaje(
+          "mensajeLogin",
+          "Ingresa un nombre de operador válido.",
+          "error"
+        );
         return;
       }
 
@@ -870,7 +1084,8 @@
       $("appScreen").classList.remove("hidden");
       $("operadorActual").textContent = operador;
       $("mensajeLogin").className = "notice";
-      cargarRegistros();
+
+      cargarDatosPrincipales();
       setTimeout(() => $("energiaActiva").focus(), 100);
     }
 
@@ -883,33 +1098,37 @@
       $("nombreOperador").focus();
     }
 
-    async function cargarRegistros() {
+    async function cargarDatosPrincipales() {
+      await Promise.allSettled([
+        cargarUltimaLectura(),
+        recargarGraficoActual()
+      ]);
+    }
+
+    async function cargarUltimaLectura() {
       try {
-        const response = await fetch(
-          `${SCRIPT_URL}?action=registros&t=${Date.now()}`,
-          { cache: "no-store" }
+        const data = await obtenerJSON(
+          `${SCRIPT_URL}?action=registros&t=${Date.now()}`
         );
 
-        if (!response.ok) throw new Error("No fue posible consultar los registros.");
+        if (!data.ok) {
+          throw new Error(data.error || "Error al consultar registros.");
+        }
 
-        const data = await response.json();
-        if (!data.ok) throw new Error(data.error || "Error al consultar registros.");
-
-        registros = Array.isArray(data.registros) ? data.registros : [];
-        ultimaLectura = registros.length ? registros[registros.length - 1] : null;
-        paginaActual = 1;
+        const registros = Array.isArray(data.registros) ? data.registros : [];
+        ultimaLectura = registros.length
+          ? registros[registros.length - 1]
+          : null;
 
         actualizarReferencia();
-        renderizarTabla();
       } catch (error) {
-        $("tablaRegistros").innerHTML = `
-          <tr>
-            <td class="empty" colspan="9">
-              No se pudieron cargar los registros. ${escaparHTML(error.message)}
-            </td>
-          </tr>
-        `;
-        actualizarPaginacion(1);
+        ultimaLectura = null;
+        actualizarReferencia();
+        mostrarMensaje(
+          "mensajeReferencia",
+          `No se pudo cargar la última lectura: ${error.message}`,
+          "error"
+        );
       }
     }
 
@@ -923,14 +1142,21 @@
         return;
       }
 
-      $("ultimaActiva").textContent = formatearNumero(ultimaLectura.energiaActivaAcumulada);
-      $("ultimaReactiva").textContent = formatearNumero(ultimaLectura.energiaReactivaAcumulada);
+      $("ultimaActiva").textContent =
+        formatearNumero(ultimaLectura.energiaActivaAcumulada);
+
+      $("ultimaReactiva").textContent =
+        formatearNumero(ultimaLectura.energiaReactivaAcumulada);
+
       $("ultimoFactorPotencia").textContent =
         ultimaLectura.factorPotenciaDiario == null
           ? "—"
           : formatearFactorPotencia(ultimaLectura.factorPotenciaDiario);
+
       $("ultimaFecha").textContent =
-        `Último registro: ${formatearFecha(ultimaLectura.fecha)} a las ${ultimaLectura.hora} · ${ultimaLectura.operador}`;
+        `Último registro: ${formatearFecha(ultimaLectura.fecha)} ` +
+        `a las ${ultimaLectura.hora} · ${ultimaLectura.operador}`;
+
       $("mensajeReferencia").style.display = "none";
     }
 
@@ -943,25 +1169,47 @@
       const boton = $("btnGuardar");
 
       if (!Number.isFinite(energiaActiva) || energiaActiva < 0) {
-        mostrarMensaje("mensajeRegistro", "Ingresa una lectura válida de energía activa.", "error");
+        mostrarMensaje(
+          "mensajeRegistro",
+          "Ingresa una lectura válida de energía activa.",
+          "error"
+        );
         $("energiaActiva").focus();
         return;
       }
 
       if (!Number.isFinite(energiaReactiva) || energiaReactiva < 0) {
-        mostrarMensaje("mensajeRegistro", "Ingresa una lectura válida de energía reactiva.", "error");
+        mostrarMensaje(
+          "mensajeRegistro",
+          "Ingresa una lectura válida de energía reactiva.",
+          "error"
+        );
         $("energiaReactiva").focus();
         return;
       }
 
-      if (ultimaLectura && energiaActiva < Number(ultimaLectura.energiaActivaAcumulada)) {
-        mostrarMensaje("mensajeRegistro", "La energía activa es menor que la última lectura registrada.", "error");
+      if (
+        ultimaLectura &&
+        energiaActiva < Number(ultimaLectura.energiaActivaAcumulada)
+      ) {
+        mostrarMensaje(
+          "mensajeRegistro",
+          "La energía activa es menor que la última lectura registrada.",
+          "error"
+        );
         $("energiaActiva").focus();
         return;
       }
 
-      if (ultimaLectura && energiaReactiva < Number(ultimaLectura.energiaReactivaAcumulada)) {
-        mostrarMensaje("mensajeRegistro", "La energía reactiva es menor que la última lectura registrada.", "error");
+      if (
+        ultimaLectura &&
+        energiaReactiva < Number(ultimaLectura.energiaReactivaAcumulada)
+      ) {
+        mostrarMensaje(
+          "mensajeRegistro",
+          "La energía reactiva es menor que la última lectura registrada.",
+          "error"
+        );
         $("energiaReactiva").focus();
         return;
       }
@@ -1011,10 +1259,13 @@
         }
 
         const registro = data.registro || {};
-        const detalleCalculo = registro.consumoActivoDiario == null
-          ? "Sin cálculo por ser la primera lectura."
-          : `Consumo activo: ${formatearNumero(registro.consumoActivoDiario)} kWh · ` +
-            `Factor de potencia: ${formatearFactorPotencia(registro.factorPotenciaDiario)}.`;
+        const detalleCalculo =
+          registro.consumoActivoDiario == null
+            ? "Sin cálculo por ser la primera lectura."
+            : `Consumo activo: ` +
+              `${formatearNumero(registro.consumoActivoDiario)} kWh · ` +
+              `Factor de potencia: ` +
+              `${formatearFactorPotencia(registro.factorPotenciaDiario)}.`;
 
         mostrarMensaje(
           "mensajeRegistro",
@@ -1026,7 +1277,7 @@
         $("energiaReactiva").value = "";
         $("observaciones").value = "";
 
-        await cargarRegistros();
+        await cargarDatosPrincipales();
         $("energiaActiva").focus();
       } catch (error) {
         mostrarMensaje("mensajeRegistro", error.message, "error");
@@ -1036,57 +1287,353 @@
       }
     }
 
-    function cambiarPagina(direccion) {
-      const totalPaginas = Math.max(1, Math.ceil(registros.length / REGISTROS_POR_PAGINA));
-      const nuevaPagina = paginaActual + direccion;
-
-      if (nuevaPagina < 1 || nuevaPagina > totalPaginas) return;
-
-      paginaActual = nuevaPagina;
-      renderizarTabla();
+    function seleccionarUltimos30() {
+      modoPeriodo = "ultimos30";
+      $("btnUltimos30").classList.add("active");
+      $("btnElegirMes").classList.remove("active");
+      $("selectorMes").classList.add("hidden");
+      cargarGraficoUltimos30();
     }
 
-    function renderizarTabla() {
-      const cuerpo = $("tablaRegistros");
-      const ordenados = [...registros].reverse();
-      const totalPaginas = Math.max(1, Math.ceil(ordenados.length / REGISTROS_POR_PAGINA));
+    function seleccionarMes() {
+      modoPeriodo = "mes";
+      $("btnUltimos30").classList.remove("active");
+      $("btnElegirMes").classList.add("active");
+      $("selectorMes").classList.remove("hidden");
 
-      if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+      if (!$("mesConsulta").value) {
+        $("mesConsulta").value = obtenerMesActual();
+      }
 
-      if (!ordenados.length) {
-        cuerpo.innerHTML = `
-          <tr>
-            <td class="empty" colspan="9">Todavía no existen registros.</td>
-          </tr>
-        `;
-        actualizarPaginacion(totalPaginas);
+      cargarGraficoMes();
+    }
+
+    async function recargarGraficoActual() {
+      if (modoPeriodo === "mes") {
+        await cargarGraficoMes();
+      } else {
+        await cargarGraficoUltimos30();
+      }
+    }
+
+    async function cargarGraficoUltimos30() {
+      mostrarEstadoGrafico("Cargando los últimos 30 días…");
+
+      try {
+        const data = await obtenerJSON(
+          `${SCRIPT_URL}?action=ultimos30&t=${Date.now()}`
+        );
+
+        if (!data.ok) {
+          throw new Error(data.error || "No se pudo consultar el período.");
+        }
+
+        const registros = Array.isArray(data.registros) ? data.registros : [];
+        const serie = construirUltimos30Dias(registros);
+
+        $("tituloPeriodo").textContent = "Últimos 30 días";
+        actualizarGrafico(serie, data.resumen || {}, registros.length);
+      } catch (error) {
+        mostrarErrorGrafico(error.message);
+      }
+    }
+
+    async function cargarGraficoMes() {
+      const mes = $("mesConsulta").value;
+
+      if (!mes) {
+        mostrarErrorGrafico("Selecciona un mes para realizar la consulta.");
         return;
       }
 
-      const inicio = (paginaActual - 1) * REGISTROS_POR_PAGINA;
-      const visibles = ordenados.slice(inicio, inicio + REGISTROS_POR_PAGINA);
+      mostrarEstadoGrafico("Cargando el mes seleccionado…");
 
-      cuerpo.innerHTML = visibles.map((item) => `
-        <tr>
-          <td>${escaparHTML(formatearFecha(item.fecha))}</td>
-          <td>${escaparHTML(item.hora || "—")}</td>
-          <td>${escaparHTML(item.operador || "—")}</td>
-          <td>${formatearNumero(item.energiaActivaAcumulada)} kWh</td>
-          <td>${formatearNumero(item.energiaReactivaAcumulada)} kVArh</td>
-          <td>${item.consumoActivoDiario == null ? "—" : formatearNumero(item.consumoActivoDiario) + " kWh"}</td>
-          <td>${item.consumoReactivoDiario == null ? "—" : formatearNumero(item.consumoReactivoDiario) + " kVArh"}</td>
-          <td>${item.factorPotenciaDiario == null ? "—" : formatearFactorPotencia(item.factorPotenciaDiario)}</td>
-          <td>${escaparHTML(item.observaciones || "—")}</td>
-        </tr>
-      `).join("");
+      try {
+        const data = await obtenerJSON(
+          `${SCRIPT_URL}?action=mes&mes=${encodeURIComponent(mes)}&t=${Date.now()}`
+        );
 
-      actualizarPaginacion(totalPaginas);
+        if (!data.ok) {
+          throw new Error(data.error || "No se pudo consultar el mes.");
+        }
+
+        const registros = Array.isArray(data.registros) ? data.registros : [];
+        const serie = construirMesCompleto(mes, registros);
+
+        $("tituloPeriodo").textContent = nombreMes(mes);
+        actualizarGrafico(serie, data.resumen || {}, registros.length);
+      } catch (error) {
+        mostrarErrorGrafico(error.message);
+      }
     }
 
-    function actualizarPaginacion(totalPaginas) {
-      $("infoPagina").textContent = `Página ${paginaActual} de ${totalPaginas}`;
-      $("btnAnterior").disabled = paginaActual <= 1;
-      $("btnSiguiente").disabled = paginaActual >= totalPaginas;
+    function actualizarGrafico(serie, resumen, cantidadRegistros) {
+      $("cantidadRegistrosGrafico").textContent =
+        `${cantidadRegistros} ${cantidadRegistros === 1 ? "lectura" : "lecturas"}`;
+
+      $("totalActivoPeriodo").textContent =
+        `${formatearNumero(resumen.totalActivo || 0)} kWh`;
+
+      $("totalReactivoPeriodo").textContent =
+        `${formatearNumero(resumen.totalReactivo || 0)} kVArh`;
+
+      $("promedioActivoPeriodo").textContent =
+        `${formatearNumero(resumen.promedioActivo || 0)} kWh`;
+
+      $("promedioFactorPeriodo").textContent =
+        resumen.promedioFactorPotencia == null
+          ? "—"
+          : formatearFactorPotencia(resumen.promedioFactorPotencia);
+
+      if (typeof Chart === "undefined") {
+        mostrarErrorGrafico(
+          "No fue posible cargar el componente del gráfico. Revisa la conexión."
+        );
+        return;
+      }
+
+      const canvas = $("graficoConsumo");
+      const contexto = canvas.getContext("2d");
+
+      if (graficoConsumo) {
+        graficoConsumo.destroy();
+      }
+
+      graficoConsumo = new Chart(contexto, {
+        type: "line",
+        data: {
+          labels: serie.labels,
+          datasets: [
+            {
+              label: "Consumo activo (kWh)",
+              data: serie.activa,
+              borderColor: "#003366",
+              backgroundColor: "rgba(0, 51, 102, 0.10)",
+              pointBackgroundColor: "#003366",
+              pointRadius: 2.5,
+              pointHoverRadius: 5,
+              borderWidth: 2.5,
+              tension: 0.25,
+              spanGaps: false
+            },
+            {
+              label: "Consumo reactivo (kVArh)",
+              data: serie.reactiva,
+              borderColor: "#de7a22",
+              backgroundColor: "rgba(222, 122, 34, 0.10)",
+              pointBackgroundColor: "#de7a22",
+              pointRadius: 2.5,
+              pointHoverRadius: 5,
+              borderWidth: 2.5,
+              tension: 0.25,
+              spanGaps: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: "index",
+            intersect: false
+          },
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                usePointStyle: true,
+                boxWidth: 8,
+                padding: 15,
+                color: "#52606d",
+                font: {
+                  family: "Poppins",
+                  size: 10,
+                  weight: "600"
+                }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label(context) {
+                  const valor = context.parsed.y;
+                  if (valor == null) return `${context.dataset.label}: Sin dato`;
+
+                  const unidad = context.datasetIndex === 0 ? "kWh" : "kVArh";
+                  return `${context.dataset.label}: ${formatearNumero(valor)} ${unidad}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: "#718096",
+                maxRotation: 0,
+                autoSkip: true,
+                maxTicksLimit: 8,
+                font: {
+                  family: "Poppins",
+                  size: 9
+                }
+              }
+            },
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: "rgba(113, 128, 150, 0.14)"
+              },
+              ticks: {
+                color: "#718096",
+                font: {
+                  family: "Poppins",
+                  size: 9
+                },
+                callback(value) {
+                  return new Intl.NumberFormat("es-CL", {
+                    notation: Math.abs(value) >= 10000 ? "compact" : "standard",
+                    maximumFractionDigits: 1
+                  }).format(value);
+                }
+              }
+            }
+          }
+        }
+      });
+
+      ocultarEstadoGrafico();
+    }
+
+    function construirUltimos30Dias(registros) {
+      const porFecha = new Map(registros.map((registro) => [registro.fecha, registro]));
+      const labels = [];
+      const activa = [];
+      const reactiva = [];
+
+      const hoy = inicioDelDia(new Date());
+
+      for (let desplazamiento = 29; desplazamiento >= 0; desplazamiento--) {
+        const fecha = new Date(hoy);
+        fecha.setDate(hoy.getDate() - desplazamiento);
+
+        const clave = fechaLocalISO(fecha);
+        const registro = porFecha.get(clave);
+
+        labels.push(formatearEtiquetaDia(fecha));
+        activa.push(numeroONull(registro?.consumoActivoDiario));
+        reactiva.push(numeroONull(registro?.consumoReactivoDiario));
+      }
+
+      return { labels, activa, reactiva };
+    }
+
+    function construirMesCompleto(mes, registros) {
+      const [anioTexto, mesTexto] = mes.split("-");
+      const anio = Number(anioTexto);
+      const numeroMes = Number(mesTexto);
+      const dias = new Date(anio, numeroMes, 0).getDate();
+      const porFecha = new Map(registros.map((registro) => [registro.fecha, registro]));
+
+      const labels = [];
+      const activa = [];
+      const reactiva = [];
+
+      for (let dia = 1; dia <= dias; dia++) {
+        const fecha = new Date(anio, numeroMes - 1, dia);
+        const clave = fechaLocalISO(fecha);
+        const registro = porFecha.get(clave);
+
+        labels.push(formatearEtiquetaDia(fecha));
+        activa.push(numeroONull(registro?.consumoActivoDiario));
+        reactiva.push(numeroONull(registro?.consumoReactivoDiario));
+      }
+
+      return { labels, activa, reactiva };
+    }
+
+    async function obtenerJSON(url) {
+      const response = await fetch(url, { cache: "no-store" });
+
+      if (!response.ok) {
+        throw new Error("No se pudo contactar el servidor.");
+      }
+
+      return response.json();
+    }
+
+    function mostrarEstadoGrafico(texto) {
+      const estado = $("estadoGrafico");
+      estado.textContent = texto;
+      estado.classList.remove("hidden");
+    }
+
+    function ocultarEstadoGrafico() {
+      $("estadoGrafico").classList.add("hidden");
+    }
+
+    function mostrarErrorGrafico(texto) {
+      $("cantidadRegistrosGrafico").textContent = "Sin datos";
+      $("totalActivoPeriodo").textContent = "—";
+      $("totalReactivoPeriodo").textContent = "—";
+      $("promedioActivoPeriodo").textContent = "—";
+      $("promedioFactorPeriodo").textContent = "—";
+
+      const estado = $("estadoGrafico");
+      estado.textContent = texto;
+      estado.classList.remove("hidden");
+
+      if (graficoConsumo) {
+        graficoConsumo.destroy();
+        graficoConsumo = null;
+      }
+    }
+
+    function obtenerMesActual() {
+      const hoy = new Date();
+      const mes = String(hoy.getMonth() + 1).padStart(2, "0");
+      return `${hoy.getFullYear()}-${mes}`;
+    }
+
+    function nombreMes(valor) {
+      const [anio, mes] = valor.split("-").map(Number);
+      return new Intl.DateTimeFormat("es-CL", {
+        month: "long",
+        year: "numeric"
+      }).format(new Date(anio, mes - 1, 1)).replace(/^./, (letra) =>
+        letra.toUpperCase()
+      );
+    }
+
+    function inicioDelDia(fecha) {
+      return new Date(
+        fecha.getFullYear(),
+        fecha.getMonth(),
+        fecha.getDate()
+      );
+    }
+
+    function fechaLocalISO(fecha) {
+      const anio = fecha.getFullYear();
+      const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+      const dia = String(fecha.getDate()).padStart(2, "0");
+      return `${anio}-${mes}-${dia}`;
+    }
+
+    function formatearEtiquetaDia(fecha) {
+      return new Intl.DateTimeFormat("es-CL", {
+        day: "2-digit",
+        month: "2-digit"
+      }).format(fecha);
+    }
+
+    function numeroONull(valor) {
+      const numero = Number(valor);
+      return valor === null || valor === undefined || valor === "" ||
+        !Number.isFinite(numero)
+        ? null
+        : numero;
     }
 
     function convertirEntradaNumero(valor) {
@@ -1139,15 +1686,7 @@
       elemento.textContent = texto;
       elemento.className = `notice ${tipo}`;
     }
-
-    function escaparHTML(valor) {
-      return String(valor ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
   </script>
+
 </body>
 </html>
