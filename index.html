@@ -786,6 +786,99 @@
       text-align: center;
     }
 
+
+    .manual-mode-box {
+      margin-top: 14px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: #f8fafc;
+    }
+
+    .manual-mode-btn {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid #e0b36f;
+      border-radius: 13px;
+      background: #fffaf1;
+      color: #9a570c;
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .manual-mode-btn.active {
+      background: #f59e0b;
+      border-color: #d97706;
+      color: #ffffff;
+      box-shadow: 0 6px 16px rgba(217, 119, 6, 0.20);
+    }
+
+    .manual-panel {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #ead8bb;
+    }
+
+    .manual-panel.hidden {
+      display: none;
+    }
+
+    .manual-help {
+      margin-top: 7px;
+      color: #8a5a2b;
+      font-size: 0.61rem;
+      line-height: 1.45;
+    }
+
+    .manual-legend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      margin-top: 10px;
+      color: #8a5a2b;
+      font-size: 0.62rem;
+      font-weight: 700;
+    }
+
+    .manual-legend-marker {
+      color: #f59e0b;
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .type-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: 0.58rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .type-badge.real {
+      background: #e8f2fb;
+      color: #003366;
+    }
+
+    .type-badge.manual {
+      background: #fff1d6;
+      color: #9a570c;
+      border: 1px solid #f0cf91;
+    }
+
+    .detail-table tbody tr.manual-row {
+      background: #fffaf0;
+    }
+
+    .detail-table tbody tr.manual-row:hover {
+      background: #fff2d8;
+    }
+
     .spinner {
       width: 17px;
       height: 17px;
@@ -946,14 +1039,36 @@
 
       <article class="card">
         <h2 class="card-title">Nueva lectura</h2>
-        <p class="card-description">
+        <p id="descripcionRegistro" class="card-description">
           Ingresa los valores acumulados que aparecen actualmente en el medidor.
         </p>
 
         <form id="registroForm">
+          <div class="manual-mode-box">
+            <button
+              id="btnIngresoManualFinSemana"
+              class="manual-mode-btn"
+              type="button"
+              aria-pressed="false"
+            >
+              Ingreso manual fin de semana
+            </button>
+
+            <div id="panelIngresoManual" class="manual-panel hidden">
+              <div class="field" style="margin-top: 0;">
+                <label for="fechaIngresoManual">Fecha del consumo</label>
+                <input id="fechaIngresoManual" type="date" autocomplete="off" />
+                <div class="manual-help">
+                  Selecciona sábado o domingo. En este modo se ingresan los
+                  consumos diarios directamente, no las lecturas acumuladas.
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="form-grid">
             <div class="field">
-              <label for="energiaActiva">Activa acumulada</label>
+              <label id="labelEnergiaActiva" for="energiaActiva">Activa acumulada</label>
               <input
                 id="energiaActiva"
                 name="energiaActiva"
@@ -963,11 +1078,11 @@
                 placeholder="kWh"
                 required
               />
-              <span class="helper">Ejemplo: 125430,75</span>
+              <span id="helperEnergiaActiva" class="helper">Ejemplo: 125430,75</span>
             </div>
 
             <div class="field">
-              <label for="energiaReactiva">Reactiva acumulada</label>
+              <label id="labelEnergiaReactiva" for="energiaReactiva">Reactiva acumulada</label>
               <input
                 id="energiaReactiva"
                 name="energiaReactiva"
@@ -977,7 +1092,7 @@
                 placeholder="kVArh"
                 required
               />
-              <span class="helper">Ejemplo: 38750,20</span>
+              <span id="helperEnergiaReactiva" class="helper">Ejemplo: 38750,20</span>
             </div>
           </div>
 
@@ -1000,7 +1115,7 @@
       </article>
 
       <article class="card">
-        <h2 class="card-title">Última lectura</h2>
+        <h2 class="card-title">Última lectura real</h2>
         <p class="card-description">
           Valores de referencia del último registro guardado.
         </p>
@@ -1070,7 +1185,12 @@
 
         <div class="period-heading">
           <div id="tituloPeriodo" class="period-title">Últimos 30 días</div>
-          <div id="cantidadRegistrosGrafico" class="period-count">0 lecturas</div>
+          <div id="cantidadRegistrosGrafico" class="period-count">0 controles</div>
+        </div>
+
+        <div class="manual-legend">
+          <span class="manual-legend-marker">◆</span>
+          Ingreso manual fin de semana
         </div>
 
         <div id="vistaGrafico" class="monitor-view">
@@ -1088,6 +1208,7 @@
               <thead>
                 <tr>
                   <th>Fecha</th>
+                  <th>Tipo</th>
                   <th>Hora</th>
                   <th>Operador</th>
                   <th>Activa acumulada</th>
@@ -1100,7 +1221,7 @@
               </thead>
               <tbody id="tablaControlesPeriodo">
                 <tr>
-                  <td class="detail-table-empty" colspan="9">
+                  <td class="detail-table-empty" colspan="10">
                     Cargando controles…
                   </td>
                 </tr>
@@ -1136,8 +1257,8 @@
         </div>
 
         <div class="monitor-note">
-          Usa Gráfico para revisar la tendencia o Tabla para ver todos los
-          detalles. En el gráfico, pasa el cursor o toca un punto para abrir el control.
+          Los ingresos manuales de fin de semana aparecen como rombos amarillos
+          en el gráfico y con una fila destacada en la tabla.
         </div>
       </article>
 
@@ -1147,7 +1268,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyFyWjAnYvA7MNDr5UppyOJoLQ_cvBI2gdou5N51nEd6ilB_t5IsD6nUStFcTOJC24-tQ/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzNrZvv-Z7PRVEzmWdPgXldGhb86u7YVtImbpX01kB18oXy-CZE-d-SsYiqPshheDjrfg/exec";
     const STORAGE_KEY = "energia_operador";
 
     let operador = "";
@@ -1156,6 +1277,7 @@
     let modoPeriodo = "ultimos30";
     let modoVista = "grafico";
     let registrosPeriodoActual = [];
+    let ingresoManualFinSemana = false;
 
     const $ = (id) => document.getElementById(id);
 
@@ -1169,6 +1291,11 @@
 
       $("btnCambiarOperador").addEventListener("click", cambiarOperador);
       $("registroForm").addEventListener("submit", guardarLectura);
+      $("btnIngresoManualFinSemana").addEventListener(
+        "click",
+        alternarIngresoManualFinSemana
+      );
+      $("fechaIngresoManual").max = fechaLocalISO(new Date());
 
       $("btnUltimos30").addEventListener("click", seleccionarUltimos30);
       $("btnElegirMes").addEventListener("click", seleccionarMes);
@@ -1269,9 +1396,13 @@
         }
 
         const registros = Array.isArray(data.registros) ? data.registros : [];
-        ultimaLectura = registros.length
-          ? registros[registros.length - 1]
-          : null;
+        ultimaLectura = [...registros]
+          .reverse()
+          .find((registro) =>
+            !esRegistroManual(registro) &&
+            registro.energiaActivaAcumulada != null &&
+            registro.energiaReactivaAcumulada != null
+          ) || null;
 
         actualizarReferencia();
       } catch (error) {
@@ -1319,12 +1450,31 @@
       const energiaActiva = convertirEntradaNumero($("energiaActiva").value);
       const energiaReactiva = convertirEntradaNumero($("energiaReactiva").value);
       const observaciones = $("observaciones").value.trim();
+      const fechaIngresoManual = $("fechaIngresoManual").value;
       const boton = $("btnGuardar");
+
+      if (ingresoManualFinSemana) {
+        const validacionFecha = validarFechaFinSemanaCliente(
+          fechaIngresoManual
+        );
+
+        if (!validacionFecha.ok) {
+          mostrarMensaje(
+            "mensajeRegistro",
+            validacionFecha.mensaje,
+            "error"
+          );
+          $("fechaIngresoManual").focus();
+          return;
+        }
+      }
 
       if (!Number.isFinite(energiaActiva) || energiaActiva < 0) {
         mostrarMensaje(
           "mensajeRegistro",
-          "Ingresa una lectura válida de energía activa.",
+          ingresoManualFinSemana
+            ? "Ingresa un consumo activo manual válido."
+            : "Ingresa una lectura válida de energía activa.",
           "error"
         );
         $("energiaActiva").focus();
@@ -1334,7 +1484,9 @@
       if (!Number.isFinite(energiaReactiva) || energiaReactiva < 0) {
         mostrarMensaje(
           "mensajeRegistro",
-          "Ingresa una lectura válida de energía reactiva.",
+          ingresoManualFinSemana
+            ? "Ingresa un consumo reactivo manual válido."
+            : "Ingresa una lectura válida de energía reactiva.",
           "error"
         );
         $("energiaReactiva").focus();
@@ -1342,6 +1494,7 @@
       }
 
       if (
+        !ingresoManualFinSemana &&
         ultimaLectura &&
         energiaActiva < Number(ultimaLectura.energiaActivaAcumulada)
       ) {
@@ -1355,6 +1508,7 @@
       }
 
       if (
+        !ingresoManualFinSemana &&
         ultimaLectura &&
         energiaReactiva < Number(ultimaLectura.energiaReactivaAcumulada)
       ) {
@@ -1368,10 +1522,16 @@
       }
 
       const confirmar = window.confirm(
-        `¿Guardar esta lectura?\n\n` +
-        `Operador: ${operador}\n` +
-        `Activa: ${formatearNumero(energiaActiva)} kWh\n` +
-        `Reactiva: ${formatearNumero(energiaReactiva)} kVArh`
+        ingresoManualFinSemana
+          ? `¿Guardar este ingreso manual?\n\n` +
+            `Fecha: ${formatearFecha(fechaIngresoManual)}\n` +
+            `Operador: ${operador}\n` +
+            `Consumo activo: ${formatearNumero(energiaActiva)} kWh\n` +
+            `Consumo reactivo: ${formatearNumero(energiaReactiva)} kVArh`
+          : `¿Guardar esta lectura?\n\n` +
+            `Operador: ${operador}\n` +
+            `Activa acumulada: ${formatearNumero(energiaActiva)} kWh\n` +
+            `Reactiva acumulada: ${formatearNumero(energiaReactiva)} kVArh`
       );
 
       if (!confirmar) return;
@@ -1383,9 +1543,21 @@
       const payload = {
         action: "registrar",
         operador,
-        energiaActiva,
-        energiaReactiva,
-        observaciones
+        observaciones,
+        tipoRegistro: ingresoManualFinSemana
+          ? "ESTIMATIVO_MANUAL_FIN_SEMANA"
+          : "LECTURA_REAL",
+        fechaRegistro: ingresoManualFinSemana
+          ? fechaIngresoManual
+          : null,
+        energiaActiva: ingresoManualFinSemana ? null : energiaActiva,
+        energiaReactiva: ingresoManualFinSemana ? null : energiaReactiva,
+        consumoActivoManual: ingresoManualFinSemana
+          ? energiaActiva
+          : null,
+        consumoReactivoManual: ingresoManualFinSemana
+          ? energiaReactiva
+          : null
       };
 
       try {
@@ -1412,9 +1584,12 @@
         }
 
         const registro = data.registro || {};
-        const detalleCalculo =
-          registro.consumoActivoDiario == null
-            ? "Sin cálculo por ser la primera lectura."
+        const detalleCalculo = registro.esIngresoManual
+          ? `Ingreso manual guardado para ${formatearFecha(registro.fecha)} · ` +
+            `Factor de potencia: ` +
+            `${formatearFactorPotencia(registro.factorPotenciaDiario)}.`
+          : registro.consumoActivoDiario == null
+            ? "Sin cálculo por ser la primera lectura real."
             : `Consumo activo: ` +
               `${formatearNumero(registro.consumoActivoDiario)} kWh · ` +
               `Factor de potencia: ` +
@@ -1422,13 +1597,16 @@
 
         mostrarMensaje(
           "mensajeRegistro",
-          `Lectura guardada correctamente. ${detalleCalculo}`,
+          `${data.mensaje || "Registro guardado correctamente."} ${detalleCalculo}`,
           "success"
         );
 
         $("energiaActiva").value = "";
         $("energiaReactiva").value = "";
         $("observaciones").value = "";
+        if (ingresoManualFinSemana) {
+          $("fechaIngresoManual").value = "";
+        }
 
         await cargarDatosPrincipales();
         $("energiaActiva").focus();
@@ -1436,8 +1614,92 @@
         mostrarMensaje("mensajeRegistro", error.message, "error");
       } finally {
         boton.disabled = false;
-        boton.textContent = "Guardar lectura";
+        boton.textContent = ingresoManualFinSemana
+          ? "Guardar ingreso manual"
+          : "Guardar lectura";
       }
+    }
+
+    function alternarIngresoManualFinSemana() {
+      ingresoManualFinSemana = !ingresoManualFinSemana;
+
+      const boton = $("btnIngresoManualFinSemana");
+      const panel = $("panelIngresoManual");
+
+      boton.classList.toggle("active", ingresoManualFinSemana);
+      boton.setAttribute(
+        "aria-pressed",
+        String(ingresoManualFinSemana)
+      );
+      panel.classList.toggle("hidden", !ingresoManualFinSemana);
+
+      if (ingresoManualFinSemana) {
+        boton.textContent = "Ingreso manual fin de semana activo";
+        $("descripcionRegistro").textContent =
+          "Ingresa directamente el consumo activo y reactivo estimado del día seleccionado.";
+        $("labelEnergiaActiva").textContent = "Consumo activo manual";
+        $("labelEnergiaReactiva").textContent = "Consumo reactivo manual";
+        $("helperEnergiaActiva").textContent = "Consumo diario estimado en kWh";
+        $("helperEnergiaReactiva").textContent = "Consumo diario estimado en kVArh";
+        $("energiaActiva").placeholder = "kWh diarios";
+        $("energiaReactiva").placeholder = "kVArh diarios";
+        $("fechaIngresoManual").value = "";
+        $("btnGuardar").textContent = "Guardar ingreso manual";
+        setTimeout(() => $("fechaIngresoManual").focus(), 50);
+      } else {
+        boton.textContent = "Ingreso manual fin de semana";
+        $("descripcionRegistro").textContent =
+          "Ingresa los valores acumulados que aparecen actualmente en el medidor.";
+        $("labelEnergiaActiva").textContent = "Activa acumulada";
+        $("labelEnergiaReactiva").textContent = "Reactiva acumulada";
+        $("helperEnergiaActiva").textContent = "Ejemplo: 125430,75";
+        $("helperEnergiaReactiva").textContent = "Ejemplo: 38750,20";
+        $("energiaActiva").placeholder = "kWh";
+        $("energiaReactiva").placeholder = "kVArh";
+        $("fechaIngresoManual").value = "";
+        $("btnGuardar").textContent = "Guardar lectura";
+      }
+
+      $("energiaActiva").value = "";
+      $("energiaReactiva").value = "";
+      $("mensajeRegistro").className = "notice";
+    }
+
+    function validarFechaFinSemanaCliente(fechaISO) {
+      if (!fechaISO) {
+        return {
+          ok: false,
+          mensaje: "Selecciona manualmente el sábado o domingo."
+        };
+      }
+
+      const fecha = crearFechaLocalDesdeISO(fechaISO);
+      const hoy = inicioDelDia(new Date());
+
+      if (Number.isNaN(fecha.getTime())) {
+        return { ok: false, mensaje: "La fecha seleccionada no es válida." };
+      }
+
+      if (fecha > hoy) {
+        return { ok: false, mensaje: "La fecha no puede ser futura." };
+      }
+
+      if (fecha.getDay() !== 0 && fecha.getDay() !== 6) {
+        return {
+          ok: false,
+          mensaje: "El ingreso manual solo permite sábado o domingo."
+        };
+      }
+
+      return { ok: true };
+    }
+
+    function crearFechaLocalDesdeISO(fechaISO) {
+      const partes = String(fechaISO).split("-").map(Number);
+      if (partes.length !== 3 || partes.some((n) => !Number.isFinite(n))) {
+        return new Date(NaN);
+      }
+      return new Date(partes[0], partes[1] - 1, partes[2]);
     }
 
     function seleccionarUltimos30() {
@@ -1526,7 +1788,7 @@
 
     function actualizarGrafico(serie, resumen, cantidadRegistros) {
       $("cantidadRegistrosGrafico").textContent =
-        `${cantidadRegistros} ${cantidadRegistros === 1 ? "lectura" : "lecturas"}`;
+        `${cantidadRegistros} ${cantidadRegistros === 1 ? "control" : "controles"}`;
 
       $("totalActivoPeriodo").textContent =
         `${formatearNumero(resumen.totalActivo || 0)} kWh`;
@@ -1566,9 +1828,21 @@
               data: serie.activa,
               borderColor: "#003366",
               backgroundColor: "rgba(0, 51, 102, 0.10)",
-              pointBackgroundColor: "#003366",
-              pointRadius: 3.5,
-              pointHoverRadius: 6,
+              pointBackgroundColor: serie.manuales.map((manual) =>
+                manual ? "#f59e0b" : "#003366"
+              ),
+              pointBorderColor: serie.manuales.map((manual) =>
+                manual ? "#92400e" : "#003366"
+              ),
+              pointStyle: serie.manuales.map((manual) =>
+                manual ? "rectRot" : "circle"
+              ),
+              pointRadius: serie.manuales.map((manual) =>
+                manual ? 6 : 3.5
+              ),
+              pointHoverRadius: serie.manuales.map((manual) =>
+                manual ? 8 : 6
+              ),
               pointHitRadius: 18,
               borderWidth: 2.5,
               tension: 0.25,
@@ -1579,9 +1853,21 @@
               data: serie.reactiva,
               borderColor: "#de7a22",
               backgroundColor: "rgba(222, 122, 34, 0.10)",
-              pointBackgroundColor: "#de7a22",
-              pointRadius: 3.5,
-              pointHoverRadius: 6,
+              pointBackgroundColor: serie.manuales.map((manual) =>
+                manual ? "#f59e0b" : "#de7a22"
+              ),
+              pointBorderColor: serie.manuales.map((manual) =>
+                manual ? "#92400e" : "#de7a22"
+              ),
+              pointStyle: serie.manuales.map((manual) =>
+                manual ? "rectRot" : "circle"
+              ),
+              pointRadius: serie.manuales.map((manual) =>
+                manual ? 6 : 3.5
+              ),
+              pointHoverRadius: serie.manuales.map((manual) =>
+                manual ? 8 : 6
+              ),
               pointHitRadius: 18,
               borderWidth: 2.5,
               tension: 0.25,
@@ -1640,6 +1926,7 @@
                   }
 
                   return [
+                    `Tipo: ${textoTipoRegistro(control)}`,
                     `Hora: ${control.hora || "—"}`,
                     `Operador: ${control.operador || "—"}`
                   ];
@@ -1754,6 +2041,7 @@
       const activa = [];
       const reactiva = [];
       const controles = [];
+      const manuales = [];
 
       const hoy = inicioDelDia(new Date());
 
@@ -1768,9 +2056,10 @@
         activa.push(numeroONull(registro?.consumoActivoDiario));
         reactiva.push(numeroONull(registro?.consumoReactivoDiario));
         controles.push(registro || null);
+        manuales.push(esRegistroManual(registro));
       }
 
-      return { labels, activa, reactiva, controles };
+      return { labels, activa, reactiva, controles, manuales };
     }
 
     function construirMesCompleto(mes, registros) {
@@ -1784,6 +2073,7 @@
       const activa = [];
       const reactiva = [];
       const controles = [];
+      const manuales = [];
 
       for (let dia = 1; dia <= dias; dia++) {
         const fecha = new Date(anio, numeroMes - 1, dia);
@@ -1794,9 +2084,10 @@
         activa.push(numeroONull(registro?.consumoActivoDiario));
         reactiva.push(numeroONull(registro?.consumoReactivoDiario));
         controles.push(registro || null);
+        manuales.push(esRegistroManual(registro));
       }
 
-      return { labels, activa, reactiva, controles };
+      return { labels, activa, reactiva, controles, manuales };
     }
 
 
@@ -1836,7 +2127,7 @@
       if (!filas.length) {
         cuerpo.innerHTML = `
           <tr>
-            <td class="detail-table-empty" colspan="9">
+            <td class="detail-table-empty" colspan="10">
               No existen controles registrados para este período.
             </td>
           </tr>
@@ -1845,15 +2136,24 @@
       }
 
       cuerpo.innerHTML = filas.map((control) => `
-        <tr>
+        <tr class="${esRegistroManual(control) ? "manual-row" : ""}">
           <td>${escaparHTML(formatearFecha(control.fecha))}</td>
+          <td>
+            <span class="type-badge ${esRegistroManual(control) ? "manual" : "real"}">
+              ${esRegistroManual(control) ? "Manual fin de semana" : "Lectura real"}
+            </span>
+          </td>
           <td>${escaparHTML(control.hora || "—")}</td>
           <td>${escaparHTML(control.operador || "—")}</td>
           <td>
-            ${formatearNumero(control.energiaActivaAcumulada)} kWh
+            ${esRegistroManual(control)
+              ? "No aplica"
+              : `${formatearNumero(control.energiaActivaAcumulada)} kWh`}
           </td>
           <td>
-            ${formatearNumero(control.energiaReactivaAcumulada)} kVArh
+            ${esRegistroManual(control)
+              ? "No aplica"
+              : `${formatearNumero(control.energiaReactivaAcumulada)} kVArh`}
           </td>
           <td>
             ${
@@ -1881,6 +2181,22 @@
           </td>
         </tr>
       `).join("");
+    }
+
+    function esRegistroManual(registro) {
+      return Boolean(
+        registro &&
+        (
+          registro.esIngresoManual === true ||
+          registro.tipoRegistro === "ESTIMATIVO_MANUAL_FIN_SEMANA"
+        )
+      );
+    }
+
+    function textoTipoRegistro(registro) {
+      return esRegistroManual(registro)
+        ? "Ingreso manual fin de semana"
+        : "Lectura real";
     }
 
     async function obtenerJSON(url) {
