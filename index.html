@@ -738,6 +738,12 @@
             <div id="ultimaReactiva" class="summary-value">—</div>
             <div class="summary-unit">kVArh acumulados</div>
           </div>
+
+          <div class="summary-box">
+            <div class="summary-label">Factor de potencia</div>
+            <div id="ultimoFactorPotencia" class="summary-value">—</div>
+            <div class="summary-unit">promedio diario</div>
+          </div>
         </div>
 
         <div id="ultimaFecha" class="summary-date">
@@ -768,12 +774,13 @@
                   <th>Reactiva acum.</th>
                   <th>Consumo activo</th>
                   <th>Consumo reactivo</th>
+                  <th>Factor de potencia</th>
                   <th>Observaciones</th>
                 </tr>
               </thead>
               <tbody id="tablaRegistros">
                 <tr>
-                  <td class="empty" colspan="8">Cargando registros…</td>
+                  <td class="empty" colspan="9">Cargando registros…</td>
                 </tr>
               </tbody>
             </table>
@@ -790,7 +797,7 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOVQtgbmF2M0nqzN-CjsoI7GKacQeDsLQkpWFkoYm0CITMyABNMIzHXNhkElfILdSHYA/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyFyWjAnYvA7MNDr5UppyOJoLQ_cvBI2gdou5N51nEd6ilB_t5IsD6nUStFcTOJC24-tQ/exec";
     const STORAGE_KEY = "energia_operador";
     const REGISTROS_POR_PAGINA = 5;
 
@@ -897,7 +904,7 @@
       } catch (error) {
         $("tablaRegistros").innerHTML = `
           <tr>
-            <td class="empty" colspan="8">
+            <td class="empty" colspan="9">
               No se pudieron cargar los registros. ${escaparHTML(error.message)}
             </td>
           </tr>
@@ -910,6 +917,7 @@
       if (!ultimaLectura) {
         $("ultimaActiva").textContent = "—";
         $("ultimaReactiva").textContent = "—";
+        $("ultimoFactorPotencia").textContent = "—";
         $("ultimaFecha").textContent = "Todavía no existen registros.";
         $("mensajeReferencia").style.display = "block";
         return;
@@ -917,6 +925,10 @@
 
       $("ultimaActiva").textContent = formatearNumero(ultimaLectura.energiaActivaAcumulada);
       $("ultimaReactiva").textContent = formatearNumero(ultimaLectura.energiaReactivaAcumulada);
+      $("ultimoFactorPotencia").textContent =
+        ultimaLectura.factorPotenciaDiario == null
+          ? "—"
+          : formatearFactorPotencia(ultimaLectura.factorPotenciaDiario);
       $("ultimaFecha").textContent =
         `Último registro: ${formatearFecha(ultimaLectura.fecha)} a las ${ultimaLectura.hora} · ${ultimaLectura.operador}`;
       $("mensajeReferencia").style.display = "none";
@@ -999,13 +1011,14 @@
         }
 
         const registro = data.registro || {};
-        const consumoActivo = registro.consumoActivoDiario == null
+        const detalleCalculo = registro.consumoActivoDiario == null
           ? "Sin cálculo por ser la primera lectura."
-          : `Consumo activo: ${formatearNumero(registro.consumoActivoDiario)} kWh.`;
+          : `Consumo activo: ${formatearNumero(registro.consumoActivoDiario)} kWh · ` +
+            `Factor de potencia: ${formatearFactorPotencia(registro.factorPotenciaDiario)}.`;
 
         mostrarMensaje(
           "mensajeRegistro",
-          `Lectura guardada correctamente. ${consumoActivo}`,
+          `Lectura guardada correctamente. ${detalleCalculo}`,
           "success"
         );
 
@@ -1043,7 +1056,7 @@
       if (!ordenados.length) {
         cuerpo.innerHTML = `
           <tr>
-            <td class="empty" colspan="8">Todavía no existen registros.</td>
+            <td class="empty" colspan="9">Todavía no existen registros.</td>
           </tr>
         `;
         actualizarPaginacion(totalPaginas);
@@ -1062,6 +1075,7 @@
           <td>${formatearNumero(item.energiaReactivaAcumulada)} kVArh</td>
           <td>${item.consumoActivoDiario == null ? "—" : formatearNumero(item.consumoActivoDiario) + " kWh"}</td>
           <td>${item.consumoReactivoDiario == null ? "—" : formatearNumero(item.consumoReactivoDiario) + " kVArh"}</td>
+          <td>${item.factorPotenciaDiario == null ? "—" : formatearFactorPotencia(item.factorPotenciaDiario)}</td>
           <td>${escaparHTML(item.observaciones || "—")}</td>
         </tr>
       `).join("");
@@ -1098,6 +1112,16 @@
       return new Intl.NumberFormat("es-CL", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
+      }).format(numero);
+    }
+
+    function formatearFactorPotencia(valor) {
+      const numero = Number(valor);
+      if (!Number.isFinite(numero)) return "—";
+
+      return new Intl.NumberFormat("es-CL", {
+        minimumFractionDigits: 3,
+        maximumFractionDigits: 3
       }).format(numero);
     }
 
