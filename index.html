@@ -681,6 +681,111 @@
       text-align: center;
     }
 
+
+    .view-tabs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+      padding: 5px;
+      border-radius: 15px;
+      background: #f5f8fb;
+      border: 1px solid var(--border);
+    }
+
+    .view-btn {
+      min-height: 40px;
+      border: 0;
+      border-radius: 11px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+    }
+
+    .view-btn.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 4px 12px rgba(30, 55, 75, 0.10);
+    }
+
+    .monitor-view.hidden {
+      display: none;
+    }
+
+    .detail-table-wrap {
+      width: 100%;
+      margin-top: 14px;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: #ffffff;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .detail-table {
+      width: 100%;
+      min-width: 1180px;
+      border-collapse: collapse;
+    }
+
+    .detail-table th {
+      padding: 12px 10px;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 0.64rem;
+      font-weight: 800;
+      line-height: 1.35;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .detail-table td {
+      padding: 11px 10px;
+      border-bottom: 1px solid #e7edf3;
+      color: #334155;
+      font-size: 0.68rem;
+      line-height: 1.45;
+      text-align: center;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .detail-table tbody tr:nth-child(even) {
+      background: #f8fafc;
+    }
+
+    .detail-table tbody tr:hover {
+      background: #eef5fb;
+    }
+
+    .detail-table .observations-cell {
+      min-width: 240px;
+      max-width: 320px;
+      text-align: left;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .detail-table-empty {
+      padding: 30px 18px !important;
+      color: var(--muted) !important;
+      font-size: 0.75rem !important;
+      text-align: center !important;
+      white-space: normal !important;
+    }
+
+    .table-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.61rem;
+      line-height: 1.45;
+      text-align: center;
+    }
+
     .spinner {
       width: 17px;
       height: 17px;
@@ -954,15 +1059,57 @@
           <button id="btnVerMes" class="month-btn" type="button">Ver mes</button>
         </div>
 
+        <div class="view-tabs" role="group" aria-label="Tipo de visualización">
+          <button id="btnVistaGrafico" class="view-btn active" type="button">
+            Gráfico
+          </button>
+          <button id="btnVistaTabla" class="view-btn" type="button">
+            Tabla
+          </button>
+        </div>
+
         <div class="period-heading">
           <div id="tituloPeriodo" class="period-title">Últimos 30 días</div>
           <div id="cantidadRegistrosGrafico" class="period-count">0 lecturas</div>
         </div>
 
-        <div class="chart-wrap">
-          <canvas id="graficoConsumo" aria-label="Gráfico de consumo diario"></canvas>
-          <div id="estadoGrafico" class="chart-state">
-            Cargando datos del consumo…
+        <div id="vistaGrafico" class="monitor-view">
+          <div class="chart-wrap">
+            <canvas id="graficoConsumo" aria-label="Gráfico de consumo diario"></canvas>
+            <div id="estadoGrafico" class="chart-state">
+              Cargando datos del consumo…
+            </div>
+          </div>
+        </div>
+
+        <div id="vistaTabla" class="monitor-view hidden">
+          <div class="detail-table-wrap">
+            <table class="detail-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Operador</th>
+                  <th>Activa acumulada</th>
+                  <th>Reactiva acumulada</th>
+                  <th>Consumo activo</th>
+                  <th>Consumo reactivo</th>
+                  <th>Factor de potencia</th>
+                  <th>Observaciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaControlesPeriodo">
+                <tr>
+                  <td class="detail-table-empty" colspan="9">
+                    Cargando controles…
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-note">
+            Desliza horizontalmente para ver todas las columnas desde el celular.
           </div>
         </div>
 
@@ -989,8 +1136,8 @@
         </div>
 
         <div class="monitor-note">
-          Pasa el cursor sobre un punto o tócalo desde el celular para ver el
-          detalle completo del control. Los días sin lectura permanecen vacíos.
+          Usa Gráfico para revisar la tendencia o Tabla para ver todos los
+          detalles. En el gráfico, pasa el cursor o toca un punto para abrir el control.
         </div>
       </article>
 
@@ -1007,6 +1154,8 @@
     let ultimaLectura = null;
     let graficoConsumo = null;
     let modoPeriodo = "ultimos30";
+    let modoVista = "grafico";
+    let registrosPeriodoActual = [];
 
     const $ = (id) => document.getElementById(id);
 
@@ -1024,6 +1173,10 @@
       $("btnUltimos30").addEventListener("click", seleccionarUltimos30);
       $("btnElegirMes").addEventListener("click", seleccionarMes);
       $("btnVerMes").addEventListener("click", cargarGraficoMes);
+
+      $("btnVistaGrafico").addEventListener("click", mostrarVistaGrafico);
+      $("btnVistaTabla").addEventListener("click", mostrarVistaTabla);
+
       $("mesConsulta").addEventListener("change", () => {
         if (modoPeriodo === "mes" && $("mesConsulta").value) {
           cargarGraficoMes();
@@ -1329,9 +1482,11 @@
         }
 
         const registros = Array.isArray(data.registros) ? data.registros : [];
+        registrosPeriodoActual = registros;
         const serie = construirUltimos30Dias(registros);
 
         $("tituloPeriodo").textContent = "Últimos 30 días";
+        renderizarTablaPeriodo(registrosPeriodoActual);
         actualizarGrafico(serie, data.resumen || {}, registros.length);
       } catch (error) {
         mostrarErrorGrafico(error.message);
@@ -1358,9 +1513,11 @@
         }
 
         const registros = Array.isArray(data.registros) ? data.registros : [];
+        registrosPeriodoActual = registros;
         const serie = construirMesCompleto(mes, registros);
 
         $("tituloPeriodo").textContent = nombreMes(mes);
+        renderizarTablaPeriodo(registrosPeriodoActual);
         actualizarGrafico(serie, data.resumen || {}, registros.length);
       } catch (error) {
         mostrarErrorGrafico(error.message);
@@ -1642,6 +1799,90 @@
       return { labels, activa, reactiva, controles };
     }
 
+
+    function mostrarVistaGrafico() {
+      modoVista = "grafico";
+      $("btnVistaGrafico").classList.add("active");
+      $("btnVistaTabla").classList.remove("active");
+      $("vistaGrafico").classList.remove("hidden");
+      $("vistaTabla").classList.add("hidden");
+
+      if (graficoConsumo) {
+        setTimeout(() => graficoConsumo.resize(), 50);
+      }
+    }
+
+    function mostrarVistaTabla() {
+      modoVista = "tabla";
+      $("btnVistaGrafico").classList.remove("active");
+      $("btnVistaTabla").classList.add("active");
+      $("vistaGrafico").classList.add("hidden");
+      $("vistaTabla").classList.remove("hidden");
+      renderizarTablaPeriodo(registrosPeriodoActual);
+    }
+
+    function renderizarTablaPeriodo(registros) {
+      const cuerpo = $("tablaControlesPeriodo");
+      if (!cuerpo) return;
+
+      const filas = Array.isArray(registros)
+        ? [...registros].sort((a, b) => {
+            const fechaA = `${a.fecha || ""} ${a.hora || ""}`;
+            const fechaB = `${b.fecha || ""} ${b.hora || ""}`;
+            return fechaB.localeCompare(fechaA);
+          })
+        : [];
+
+      if (!filas.length) {
+        cuerpo.innerHTML = `
+          <tr>
+            <td class="detail-table-empty" colspan="9">
+              No existen controles registrados para este período.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      cuerpo.innerHTML = filas.map((control) => `
+        <tr>
+          <td>${escaparHTML(formatearFecha(control.fecha))}</td>
+          <td>${escaparHTML(control.hora || "—")}</td>
+          <td>${escaparHTML(control.operador || "—")}</td>
+          <td>
+            ${formatearNumero(control.energiaActivaAcumulada)} kWh
+          </td>
+          <td>
+            ${formatearNumero(control.energiaReactivaAcumulada)} kVArh
+          </td>
+          <td>
+            ${
+              control.consumoActivoDiario == null
+                ? "—"
+                : `${formatearNumero(control.consumoActivoDiario)} kWh`
+            }
+          </td>
+          <td>
+            ${
+              control.consumoReactivoDiario == null
+                ? "—"
+                : `${formatearNumero(control.consumoReactivoDiario)} kVArh`
+            }
+          </td>
+          <td>
+            ${
+              control.factorPotenciaDiario == null
+                ? "—"
+                : formatearFactorPotencia(control.factorPotenciaDiario)
+            }
+          </td>
+          <td class="observations-cell">
+            ${escaparHTML(control.observaciones || "Sin observaciones")}
+          </td>
+        </tr>
+      `).join("");
+    }
+
     async function obtenerJSON(url) {
       const response = await fetch(url, { cache: "no-store" });
 
@@ -1668,6 +1909,8 @@
       $("totalReactivoPeriodo").textContent = "—";
       $("promedioActivoPeriodo").textContent = "—";
       $("promedioFactorPeriodo").textContent = "—";
+      registrosPeriodoActual = [];
+      renderizarTablaPeriodo([]);
 
       const estado = $("estadoGrafico");
       estado.textContent = texto;
@@ -1768,6 +2011,16 @@
       if (partes.length !== 3) return fechaISO;
 
       return `${partes[2]}-${partes[1]}-${partes[0]}`;
+    }
+
+
+    function escaparHTML(valor) {
+      return String(valor ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
     function mostrarMensaje(id, texto, tipo) {
