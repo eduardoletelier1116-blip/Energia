@@ -789,30 +789,86 @@
 
     .manual-mode-box {
       margin-top: 14px;
-      padding: 12px;
+      padding: 12px 14px;
       border: 1px solid var(--border);
       border-radius: 16px;
       background: #f8fafc;
     }
 
-    .manual-mode-btn {
-      width: 100%;
-      min-height: 44px;
-      border: 1px solid #e0b36f;
-      border-radius: 13px;
-      background: #fffaf1;
-      color: #9a570c;
-      font-size: 0.68rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      cursor: pointer;
+    .manual-switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
     }
 
-    .manual-mode-btn.active {
+    .manual-switch-copy {
+      min-width: 0;
+    }
+
+    .manual-switch-title {
+      color: var(--primary);
+      font-size: 0.7rem;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .manual-switch-subtitle {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 0.57rem;
+      line-height: 1.45;
+    }
+
+    .switch-control {
+      position: relative;
+      flex: 0 0 auto;
+      width: 48px;
+      height: 27px;
+    }
+
+    .switch-control input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .switch-slider {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: #cbd5e1;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .switch-slider::before {
+      content: "";
+      position: absolute;
+      width: 21px;
+      height: 21px;
+      left: 3px;
+      top: 3px;
+      border-radius: 50%;
+      background: #ffffff;
+      box-shadow: 0 2px 7px rgba(15, 23, 42, 0.22);
+      transition: transform 0.2s;
+    }
+
+    .switch-control input:checked + .switch-slider {
       background: #f59e0b;
-      border-color: #d97706;
-      color: #ffffff;
-      box-shadow: 0 6px 16px rgba(217, 119, 6, 0.20);
+      box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.13);
+    }
+
+    .switch-control input:checked + .switch-slider::before {
+      transform: translateX(21px);
+    }
+
+    .switch-control input:focus-visible + .switch-slider {
+      outline: 3px solid rgba(0, 51, 102, 0.18);
+      outline-offset: 2px;
     }
 
     .manual-panel {
@@ -1045,14 +1101,29 @@
 
         <form id="registroForm">
           <div class="manual-mode-box">
-            <button
-              id="btnIngresoManualFinSemana"
-              class="manual-mode-btn"
-              type="button"
-              aria-pressed="false"
-            >
-              Ingreso manual fin de semana
-            </button>
+            <div class="manual-switch-row">
+              <div class="manual-switch-copy">
+                <div class="manual-switch-title">
+                  Ingreso manual fin de semana
+                </div>
+                <div class="manual-switch-subtitle">
+                  Actívalo solo para ingresar directamente el consumo del sábado o domingo.
+                </div>
+              </div>
+
+              <label
+                class="switch-control"
+                aria-label="Activar ingreso manual fin de semana"
+              >
+                <input
+                  id="switchIngresoManualFinSemana"
+                  type="checkbox"
+                  role="switch"
+                  aria-checked="false"
+                />
+                <span class="switch-slider"></span>
+              </label>
+            </div>
 
             <div id="panelIngresoManual" class="manual-panel hidden">
               <div class="field" style="margin-top: 0;">
@@ -1291,8 +1362,8 @@
 
       $("btnCambiarOperador").addEventListener("click", cambiarOperador);
       $("registroForm").addEventListener("submit", guardarLectura);
-      $("btnIngresoManualFinSemana").addEventListener(
-        "click",
+      $("switchIngresoManualFinSemana").addEventListener(
+        "change",
         alternarIngresoManualFinSemana
       );
       $("fechaIngresoManual").max = fechaLocalISO(new Date());
@@ -1621,20 +1692,18 @@
     }
 
     function alternarIngresoManualFinSemana() {
-      ingresoManualFinSemana = !ingresoManualFinSemana;
+      const switchIngreso = $("switchIngresoManualFinSemana");
+      ingresoManualFinSemana = switchIngreso.checked;
 
-      const boton = $("btnIngresoManualFinSemana");
       const panel = $("panelIngresoManual");
 
-      boton.classList.toggle("active", ingresoManualFinSemana);
-      boton.setAttribute(
-        "aria-pressed",
+      switchIngreso.setAttribute(
+        "aria-checked",
         String(ingresoManualFinSemana)
       );
       panel.classList.toggle("hidden", !ingresoManualFinSemana);
 
       if (ingresoManualFinSemana) {
-        boton.textContent = "Ingreso manual fin de semana activo";
         $("descripcionRegistro").textContent =
           "Ingresa directamente el consumo activo y reactivo estimado del día seleccionado.";
         $("labelEnergiaActiva").textContent = "Consumo activo manual";
@@ -1643,11 +1712,10 @@
         $("helperEnergiaReactiva").textContent = "Consumo diario estimado en kVArh";
         $("energiaActiva").placeholder = "kWh diarios";
         $("energiaReactiva").placeholder = "kVArh diarios";
-        $("fechaIngresoManual").value = "";
         $("btnGuardar").textContent = "Guardar ingreso manual";
+        $("fechaIngresoManual").value = "";
         setTimeout(() => $("fechaIngresoManual").focus(), 50);
       } else {
-        boton.textContent = "Ingreso manual fin de semana";
         $("descripcionRegistro").textContent =
           "Ingresa los valores acumulados que aparecen actualmente en el medidor.";
         $("labelEnergiaActiva").textContent = "Activa acumulada";
@@ -1656,50 +1724,14 @@
         $("helperEnergiaReactiva").textContent = "Ejemplo: 38750,20";
         $("energiaActiva").placeholder = "kWh";
         $("energiaReactiva").placeholder = "kVArh";
-        $("fechaIngresoManual").value = "";
         $("btnGuardar").textContent = "Guardar lectura";
+        $("fechaIngresoManual").value = "";
       }
 
       $("energiaActiva").value = "";
       $("energiaReactiva").value = "";
+      $("observaciones").value = "";
       $("mensajeRegistro").className = "notice";
-    }
-
-    function validarFechaFinSemanaCliente(fechaISO) {
-      if (!fechaISO) {
-        return {
-          ok: false,
-          mensaje: "Selecciona manualmente el sábado o domingo."
-        };
-      }
-
-      const fecha = crearFechaLocalDesdeISO(fechaISO);
-      const hoy = inicioDelDia(new Date());
-
-      if (Number.isNaN(fecha.getTime())) {
-        return { ok: false, mensaje: "La fecha seleccionada no es válida." };
-      }
-
-      if (fecha > hoy) {
-        return { ok: false, mensaje: "La fecha no puede ser futura." };
-      }
-
-      if (fecha.getDay() !== 0 && fecha.getDay() !== 6) {
-        return {
-          ok: false,
-          mensaje: "El ingreso manual solo permite sábado o domingo."
-        };
-      }
-
-      return { ok: true };
-    }
-
-    function crearFechaLocalDesdeISO(fechaISO) {
-      const partes = String(fechaISO).split("-").map(Number);
-      if (partes.length !== 3 || partes.some((n) => !Number.isFinite(n))) {
-        return new Date(NaN);
-      }
-      return new Date(partes[0], partes[1] - 1, partes[2]);
     }
 
     function seleccionarUltimos30() {
