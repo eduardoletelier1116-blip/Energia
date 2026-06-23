@@ -989,8 +989,8 @@
         </div>
 
         <div class="monitor-note">
-          Los días sin lectura permanecen vacíos. El consumo se calcula con la
-          diferencia entre la lectura del día y la lectura anterior.
+          Pasa el cursor sobre un punto o tócalo desde el celular para ver el
+          detalle completo del control. Los días sin lectura permanecen vacíos.
         </div>
       </article>
 
@@ -1410,8 +1410,9 @@
               borderColor: "#003366",
               backgroundColor: "rgba(0, 51, 102, 0.10)",
               pointBackgroundColor: "#003366",
-              pointRadius: 2.5,
-              pointHoverRadius: 5,
+              pointRadius: 3.5,
+              pointHoverRadius: 6,
+              pointHitRadius: 18,
               borderWidth: 2.5,
               tension: 0.25,
               spanGaps: false
@@ -1422,8 +1423,9 @@
               borderColor: "#de7a22",
               backgroundColor: "rgba(222, 122, 34, 0.10)",
               pointBackgroundColor: "#de7a22",
-              pointRadius: 2.5,
-              pointHoverRadius: 5,
+              pointRadius: 3.5,
+              pointHoverRadius: 6,
+              pointHitRadius: 18,
               borderWidth: 2.5,
               tension: 0.25,
               spanGaps: false
@@ -1453,13 +1455,96 @@
               }
             },
             tooltip: {
+              displayColors: true,
+              padding: 12,
+              titleSpacing: 4,
+              bodySpacing: 5,
+              footerSpacing: 5,
               callbacks: {
+                title(contextos) {
+                  if (!contextos.length) return "";
+
+                  const indice = contextos[0].dataIndex;
+                  const control = serie.controles[indice];
+
+                  return control
+                    ? `Control del ${formatearFecha(control.fecha)}`
+                    : `Día ${serie.labels[indice]}`;
+                },
+
+                beforeBody(contextos) {
+                  if (!contextos.length) return [];
+
+                  const indice = contextos[0].dataIndex;
+                  const control = serie.controles[indice];
+
+                  if (!control) {
+                    return ["Sin control registrado para este día"];
+                  }
+
+                  return [
+                    `Hora: ${control.hora || "—"}`,
+                    `Operador: ${control.operador || "—"}`
+                  ];
+                },
+
                 label(context) {
                   const valor = context.parsed.y;
-                  if (valor == null) return `${context.dataset.label}: Sin dato`;
 
-                  const unidad = context.datasetIndex === 0 ? "kWh" : "kVArh";
-                  return `${context.dataset.label}: ${formatearNumero(valor)} ${unidad}`;
+                  if (valor == null) {
+                    return `${context.dataset.label}: Sin dato`;
+                  }
+
+                  const unidad =
+                    context.datasetIndex === 0 ? "kWh" : "kVArh";
+
+                  return (
+                    `${context.dataset.label}: ` +
+                    `${formatearNumero(valor)} ${unidad}`
+                  );
+                },
+
+                afterBody(contextos) {
+                  if (!contextos.length) return [];
+
+                  const indice = contextos[0].dataIndex;
+                  const control = serie.controles[indice];
+
+                  if (!control) return [];
+
+                  const factor =
+                    control.factorPotenciaDiario == null
+                      ? "—"
+                      : formatearFactorPotencia(
+                          control.factorPotenciaDiario
+                        );
+
+                  return [
+                    "",
+                    `Lectura activa acumulada: ${
+                      formatearNumero(
+                        control.energiaActivaAcumulada
+                      )
+                    } kWh`,
+                    `Lectura reactiva acumulada: ${
+                      formatearNumero(
+                        control.energiaReactivaAcumulada
+                      )
+                    } kVArh`,
+                    `Factor de potencia: ${factor}`,
+                    `Observaciones: ${
+                      control.observaciones || "Sin observaciones"
+                    }`
+                  ];
+                },
+
+                footer(contextos) {
+                  if (!contextos.length) return "";
+
+                  const indice = contextos[0].dataIndex;
+                  return serie.controles[indice]
+                    ? "Toca fuera del gráfico para cerrar"
+                    : "";
                 }
               }
             }
@@ -1511,6 +1596,7 @@
       const labels = [];
       const activa = [];
       const reactiva = [];
+      const controles = [];
 
       const hoy = inicioDelDia(new Date());
 
@@ -1524,9 +1610,10 @@
         labels.push(formatearEtiquetaDia(fecha));
         activa.push(numeroONull(registro?.consumoActivoDiario));
         reactiva.push(numeroONull(registro?.consumoReactivoDiario));
+        controles.push(registro || null);
       }
 
-      return { labels, activa, reactiva };
+      return { labels, activa, reactiva, controles };
     }
 
     function construirMesCompleto(mes, registros) {
@@ -1539,6 +1626,7 @@
       const labels = [];
       const activa = [];
       const reactiva = [];
+      const controles = [];
 
       for (let dia = 1; dia <= dias; dia++) {
         const fecha = new Date(anio, numeroMes - 1, dia);
@@ -1548,9 +1636,10 @@
         labels.push(formatearEtiquetaDia(fecha));
         activa.push(numeroONull(registro?.consumoActivoDiario));
         reactiva.push(numeroONull(registro?.consumoReactivoDiario));
+        controles.push(registro || null);
       }
 
-      return { labels, activa, reactiva };
+      return { labels, activa, reactiva, controles };
     }
 
     async function obtenerJSON(url) {
