@@ -1438,13 +1438,8 @@
 
         <div class="monthly-content">
           <form id="formIndicadoresMensuales">
-            <div class="field">
-              <label for="mesIndicadores">Mes correspondiente</label>
-              <input id="mesIndicadores" type="month" required />
-            </div>
-
             <div id="estadoIndicadorMensual" class="monthly-status">
-              Abre el apartado y selecciona un mes.
+              Los indicadores se asociarán automáticamente a la fecha de ingreso.
             </div>
 
             <div class="form-grid">
@@ -1541,7 +1536,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_fPgTVXXrcQYcchY8fIbiw7l-LwY8SbWhOPETHLDRMNgkfjJxtBOJ0_5j61HjVhPCIw/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQ73mor6LTWGyVlljM1kbEKCa-3ZPyJwFbY3hC2sap8bUM5KpTiVr25jP2rUli7KAnrA/exec";
     const STORAGE_KEY = "energia_operador";
 
     let operador = "";
@@ -1585,16 +1580,10 @@
       });
 
       $("mesConsulta").value = obtenerMesActual();
-      $("mesIndicadores").value = obtenerMesActual();
-      $("mesIndicadores").max = obtenerMesActual();
 
       $("panelIndicadoresMensuales").addEventListener(
         "toggle",
         manejarPanelIndicadoresMensuales
-      );
-      $("mesIndicadores").addEventListener(
-        "change",
-        cargarIndicadoresMensuales
       );
       $("formIndicadoresMensuales").addEventListener(
         "submit",
@@ -1958,33 +1947,20 @@
 
       if (!panel.open) return;
 
-      if (!$("mesIndicadores").value) {
-        $("mesIndicadores").value = obtenerMesActual();
-      }
-
       await cargarIndicadoresMensuales();
     }
 
     async function cargarIndicadoresMensuales() {
-      const mes = $("mesIndicadores").value;
-
-      if (!mes) {
-        limpiarFormularioMensual();
-        actualizarEstadoMensual(
-          "Selecciona un mes para consultar o ingresar sus indicadores.",
-          "new"
-        );
-        return;
-      }
+      const mesActual = obtenerMesActual();
 
       actualizarEstadoMensual(
-        `Consultando ${nombreMes(mes)}…`,
+        `Consultando los indicadores de ${nombreMes(mesActual)}…`,
         ""
       );
 
       try {
         const data = await obtenerJSON(
-          `${SCRIPT_URL}?action=mensuales&mes=${encodeURIComponent(mes)}&t=${Date.now()}`
+          `${SCRIPT_URL}?action=mensuales&t=${Date.now()}`
         );
 
         if (!data.ok) {
@@ -1999,12 +1975,12 @@
 
         if (!registro) {
           indicadorMensualExistente = false;
-          limpiarFormularioMensual(false);
+          limpiarFormularioMensual();
           $("btnGuardarIndicadores").textContent =
             "Guardar indicadores mensuales";
 
           actualizarEstadoMensual(
-            `No existen indicadores registrados para ${nombreMes(mes)}. Puedes ingresarlos ahora.`,
+            `No existen indicadores registrados para ${nombreMes(mesActual)}. Se guardarán con la fecha actual.`,
             "new"
           );
           return;
@@ -2026,19 +2002,19 @@
           "Actualizar indicadores mensuales";
 
         actualizarEstadoMensual(
-          `Registro existente cargado · ${registro.operador || "Sin operador"} · ${formatearFecha(registro.fechaRegistro)} ${registro.hora || ""}`,
+          `Indicadores de ${nombreMes(registro.mes)} cargados · ${registro.operador || "Sin operador"} · ${formatearFecha(registro.fechaRegistro)} ${registro.hora || ""}`,
           "loaded"
         );
       } catch (error) {
         indicadorMensualExistente = false;
-        limpiarFormularioMensual(false);
+        limpiarFormularioMensual();
         mostrarMensaje(
           "mensajeIndicadoresMensuales",
           error.message,
           "error"
         );
         actualizarEstadoMensual(
-          "No fue posible cargar el mes seleccionado.",
+          "No fue posible cargar los indicadores del mes actual.",
           ""
         );
       }
@@ -2047,7 +2023,7 @@
     async function guardarIndicadoresMensuales(event) {
       event.preventDefault();
 
-      const mes = $("mesIndicadores").value;
+      const mesActual = obtenerMesActual();
       const desequilibrioTension = convertirEntradaNumero(
         $("desequilibrioTension").value
       );
@@ -2063,16 +2039,6 @@
       const informacionAdicional =
         $("informacionMensual").value.trim();
       const boton = $("btnGuardarIndicadores");
-
-      if (!mes) {
-        mostrarMensaje(
-          "mensajeIndicadoresMensuales",
-          "Selecciona el mes correspondiente.",
-          "error"
-        );
-        $("mesIndicadores").focus();
-        return;
-      }
 
       const campos = [
         {
@@ -2118,7 +2084,7 @@
         : "guardar";
 
       const confirmar = window.confirm(
-        `¿${accionTexto === "actualizar" ? "Actualizar" : "Guardar"} los indicadores de ${nombreMes(mes)}?\n\n` +
+        `¿${accionTexto === "actualizar" ? "Actualizar" : "Guardar"} los indicadores de ${nombreMes(mesActual)}?\n\n` +
         `Desequilibrio de tensión: ${formatearNumero(desequilibrioTension)} %\n` +
         `Desequilibrio de corriente: ${formatearNumero(desequilibrioCorriente)} %\n` +
         `Energía activa entregada: ${formatearNumero(energiaActivaEntregada)} kWh\n` +
@@ -2138,7 +2104,6 @@
       const payload = {
         action: "registrar_mensual",
         operador,
-        mes,
         desequilibrioTension,
         desequilibrioCorriente,
         energiaActivaEntregada,
@@ -2201,11 +2166,7 @@
       }
     }
 
-    function limpiarFormularioMensual(limpiarMes = false) {
-      if (limpiarMes) {
-        $("mesIndicadores").value = "";
-      }
-
+    function limpiarFormularioMensual() {
       $("desequilibrioTension").value = "";
       $("desequilibrioCorriente").value = "";
       $("energiaActivaEntregada").value = "";
