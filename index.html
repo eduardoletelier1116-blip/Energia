@@ -935,6 +935,98 @@
       background: #fff2d8;
     }
 
+
+    details.monthly-card {
+      overflow: hidden;
+      padding: 0;
+    }
+
+    details.monthly-card > summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      user-select: none;
+    }
+
+    details.monthly-card > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .monthly-summary-copy {
+      min-width: 0;
+    }
+
+    .monthly-summary-title {
+      color: var(--primary);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .monthly-summary-subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.61rem;
+      line-height: 1.45;
+    }
+
+    .monthly-arrow {
+      flex: 0 0 auto;
+      width: 32px;
+      height: 32px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 0.9rem;
+      transition: transform 0.2s;
+    }
+
+    details.monthly-card[open] .monthly-arrow {
+      transform: rotate(180deg);
+    }
+
+    .monthly-content {
+      padding: 0 18px 19px;
+      border-top: 1px solid var(--border);
+    }
+
+    .monthly-status {
+      margin-top: 13px;
+      padding: 10px 12px;
+      border-radius: 13px;
+      background: #f5f8fb;
+      color: var(--muted);
+      font-size: 0.63rem;
+      line-height: 1.45;
+    }
+
+    .monthly-status.loaded {
+      background: #eaf3fb;
+      color: var(--primary);
+      border: 1px solid #cbddea;
+    }
+
+    .monthly-status.new {
+      background: #fff8e8;
+      color: #8a5a2b;
+      border: 1px solid #eed9a8;
+    }
+
+    .monthly-unit {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 0.57rem;
+      line-height: 1.4;
+    }
+
     .spinner {
       width: 17px;
       height: 17px;
@@ -1104,7 +1196,7 @@
             <div class="manual-switch-row">
               <div class="manual-switch-copy">
                 <div class="manual-switch-title">
-                  Ingreso manual 
+                  Ingreso manual fin de semana
                 </div>
                 <div class="manual-switch-subtitle">
                   Actívalo solo para ingresar directamente el consumo del sábado o domingo.
@@ -1333,13 +1425,123 @@
         </div>
       </article>
 
+      <details id="panelIndicadoresMensuales" class="card monthly-card">
+        <summary>
+          <div class="monthly-summary-copy">
+            <div class="monthly-summary-title">Indicadores mensuales</div>
+            <div class="monthly-summary-subtitle">
+              Desequilibrios, energía entregada e información adicional.
+            </div>
+          </div>
+          <span class="monthly-arrow">⌄</span>
+        </summary>
+
+        <div class="monthly-content">
+          <form id="formIndicadoresMensuales">
+            <div class="field">
+              <label for="mesIndicadores">Mes correspondiente</label>
+              <input id="mesIndicadores" type="month" required />
+            </div>
+
+            <div id="estadoIndicadorMensual" class="monthly-status">
+              Abre el apartado y selecciona un mes.
+            </div>
+
+            <div class="form-grid">
+              <div class="field">
+                <label for="desequilibrioTension">
+                  Desequilibrio de tensión
+                </label>
+                <input
+                  id="desequilibrioTension"
+                  type="text"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  placeholder="0,000"
+                  required
+                />
+                <span class="monthly-unit">Valor porcentual (%)</span>
+              </div>
+
+              <div class="field">
+                <label for="desequilibrioCorriente">
+                  Desequilibrio de corriente
+                </label>
+                <input
+                  id="desequilibrioCorriente"
+                  type="text"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  placeholder="0,000"
+                  required
+                />
+                <span class="monthly-unit">Valor porcentual (%)</span>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="field">
+                <label for="energiaActivaEntregada">
+                  Energía activa entregada
+                </label>
+                <input
+                  id="energiaActivaEntregada"
+                  type="text"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  placeholder="kWh"
+                  required
+                />
+                <span class="monthly-unit">Energía entregada en kWh</span>
+              </div>
+
+              <div class="field">
+                <label for="energiaReactivaEntregada">
+                  Energía reactiva entregada
+                </label>
+                <input
+                  id="energiaReactivaEntregada"
+                  type="text"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  placeholder="kVArh"
+                  required
+                />
+                <span class="monthly-unit">Energía entregada en kVArh</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="informacionMensual">
+                Información adicional
+              </label>
+              <textarea
+                id="informacionMensual"
+                maxlength="1500"
+                placeholder="Agrega antecedentes, variaciones, causas, comentarios u otra información relevante"
+              ></textarea>
+            </div>
+
+            <button
+              id="btnGuardarIndicadores"
+              class="btn btn-primary"
+              type="submit"
+            >
+              Guardar indicadores mensuales
+            </button>
+
+            <div id="mensajeIndicadoresMensuales" class="notice"></div>
+          </form>
+        </div>
+      </details>
+
     </section>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzNrZvv-Z7PRVEzmWdPgXldGhb86u7YVtImbpX01kB18oXy-CZE-d-SsYiqPshheDjrfg/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_fPgTVXXrcQYcchY8fIbiw7l-LwY8SbWhOPETHLDRMNgkfjJxtBOJ0_5j61HjVhPCIw/exec";
     const STORAGE_KEY = "energia_operador";
 
     let operador = "";
@@ -1349,6 +1551,7 @@
     let modoVista = "grafico";
     let registrosPeriodoActual = [];
     let ingresoManualFinSemana = false;
+    let indicadorMensualExistente = false;
 
     const $ = (id) => document.getElementById(id);
 
@@ -1382,6 +1585,21 @@
       });
 
       $("mesConsulta").value = obtenerMesActual();
+      $("mesIndicadores").value = obtenerMesActual();
+      $("mesIndicadores").max = obtenerMesActual();
+
+      $("panelIndicadoresMensuales").addEventListener(
+        "toggle",
+        manejarPanelIndicadoresMensuales
+      );
+      $("mesIndicadores").addEventListener(
+        "change",
+        cargarIndicadoresMensuales
+      );
+      $("formIndicadoresMensuales").addEventListener(
+        "submit",
+        guardarIndicadoresMensuales
+      );
 
       operador = localStorage.getItem(STORAGE_KEY) || "";
       comprobarConexion();
@@ -1732,6 +1950,288 @@
       $("energiaReactiva").value = "";
       $("observaciones").value = "";
       $("mensajeRegistro").className = "notice";
+    }
+
+
+    async function manejarPanelIndicadoresMensuales() {
+      const panel = $("panelIndicadoresMensuales");
+
+      if (!panel.open) return;
+
+      if (!$("mesIndicadores").value) {
+        $("mesIndicadores").value = obtenerMesActual();
+      }
+
+      await cargarIndicadoresMensuales();
+    }
+
+    async function cargarIndicadoresMensuales() {
+      const mes = $("mesIndicadores").value;
+
+      if (!mes) {
+        limpiarFormularioMensual();
+        actualizarEstadoMensual(
+          "Selecciona un mes para consultar o ingresar sus indicadores.",
+          "new"
+        );
+        return;
+      }
+
+      actualizarEstadoMensual(
+        `Consultando ${nombreMes(mes)}…`,
+        ""
+      );
+
+      try {
+        const data = await obtenerJSON(
+          `${SCRIPT_URL}?action=mensuales&mes=${encodeURIComponent(mes)}&t=${Date.now()}`
+        );
+
+        if (!data.ok) {
+          throw new Error(
+            data.error || "No se pudieron consultar los indicadores mensuales."
+          );
+        }
+
+        const registro = Array.isArray(data.registros)
+          ? data.registros[0]
+          : null;
+
+        if (!registro) {
+          indicadorMensualExistente = false;
+          limpiarFormularioMensual(false);
+          $("btnGuardarIndicadores").textContent =
+            "Guardar indicadores mensuales";
+
+          actualizarEstadoMensual(
+            `No existen indicadores registrados para ${nombreMes(mes)}. Puedes ingresarlos ahora.`,
+            "new"
+          );
+          return;
+        }
+
+        indicadorMensualExistente = true;
+        $("desequilibrioTension").value =
+          valorParaEntrada(registro.desequilibrioTension);
+        $("desequilibrioCorriente").value =
+          valorParaEntrada(registro.desequilibrioCorriente);
+        $("energiaActivaEntregada").value =
+          valorParaEntrada(registro.energiaActivaEntregada);
+        $("energiaReactivaEntregada").value =
+          valorParaEntrada(registro.energiaReactivaEntregada);
+        $("informacionMensual").value =
+          registro.informacionAdicional || "";
+
+        $("btnGuardarIndicadores").textContent =
+          "Actualizar indicadores mensuales";
+
+        actualizarEstadoMensual(
+          `Registro existente cargado · ${registro.operador || "Sin operador"} · ${formatearFecha(registro.fechaRegistro)} ${registro.hora || ""}`,
+          "loaded"
+        );
+      } catch (error) {
+        indicadorMensualExistente = false;
+        limpiarFormularioMensual(false);
+        mostrarMensaje(
+          "mensajeIndicadoresMensuales",
+          error.message,
+          "error"
+        );
+        actualizarEstadoMensual(
+          "No fue posible cargar el mes seleccionado.",
+          ""
+        );
+      }
+    }
+
+    async function guardarIndicadoresMensuales(event) {
+      event.preventDefault();
+
+      const mes = $("mesIndicadores").value;
+      const desequilibrioTension = convertirEntradaNumero(
+        $("desequilibrioTension").value
+      );
+      const desequilibrioCorriente = convertirEntradaNumero(
+        $("desequilibrioCorriente").value
+      );
+      const energiaActivaEntregada = convertirEntradaNumero(
+        $("energiaActivaEntregada").value
+      );
+      const energiaReactivaEntregada = convertirEntradaNumero(
+        $("energiaReactivaEntregada").value
+      );
+      const informacionAdicional =
+        $("informacionMensual").value.trim();
+      const boton = $("btnGuardarIndicadores");
+
+      if (!mes) {
+        mostrarMensaje(
+          "mensajeIndicadoresMensuales",
+          "Selecciona el mes correspondiente.",
+          "error"
+        );
+        $("mesIndicadores").focus();
+        return;
+      }
+
+      const campos = [
+        {
+          valor: desequilibrioTension,
+          id: "desequilibrioTension",
+          nombre: "desequilibrio de tensión"
+        },
+        {
+          valor: desequilibrioCorriente,
+          id: "desequilibrioCorriente",
+          nombre: "desequilibrio de corriente"
+        },
+        {
+          valor: energiaActivaEntregada,
+          id: "energiaActivaEntregada",
+          nombre: "energía activa entregada"
+        },
+        {
+          valor: energiaReactivaEntregada,
+          id: "energiaReactivaEntregada",
+          nombre: "energía reactiva entregada"
+        }
+      ];
+
+      const campoInvalido = campos.find(
+        (campo) =>
+          !Number.isFinite(campo.valor) ||
+          campo.valor < 0
+      );
+
+      if (campoInvalido) {
+        mostrarMensaje(
+          "mensajeIndicadoresMensuales",
+          `Ingresa un valor válido para ${campoInvalido.nombre}.`,
+          "error"
+        );
+        $(campoInvalido.id).focus();
+        return;
+      }
+
+      const accionTexto = indicadorMensualExistente
+        ? "actualizar"
+        : "guardar";
+
+      const confirmar = window.confirm(
+        `¿${accionTexto === "actualizar" ? "Actualizar" : "Guardar"} los indicadores de ${nombreMes(mes)}?\n\n` +
+        `Desequilibrio de tensión: ${formatearNumero(desequilibrioTension)} %\n` +
+        `Desequilibrio de corriente: ${formatearNumero(desequilibrioCorriente)} %\n` +
+        `Energía activa entregada: ${formatearNumero(energiaActivaEntregada)} kWh\n` +
+        `Energía reactiva entregada: ${formatearNumero(energiaReactivaEntregada)} kVArh`
+      );
+
+      if (!confirmar) return;
+
+      boton.disabled = true;
+      boton.innerHTML = '<span class="spinner"></span>Guardando';
+      mostrarMensaje(
+        "mensajeIndicadoresMensuales",
+        "Enviando indicadores mensuales…",
+        "info"
+      );
+
+      const payload = {
+        action: "registrar_mensual",
+        operador,
+        mes,
+        desequilibrioTension,
+        desequilibrioCorriente,
+        energiaActivaEntregada,
+        energiaReactivaEntregada,
+        informacionAdicional
+      };
+
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify(payload),
+          redirect: "follow"
+        });
+
+        const text = await response.text();
+        let data;
+
+        try {
+          data = JSON.parse(text);
+        } catch {
+          throw new Error(
+            "El servidor entregó una respuesta no válida."
+          );
+        }
+
+        if (!data.ok) {
+          throw new Error(
+            data.error || "No fue posible guardar los indicadores."
+          );
+        }
+
+        indicadorMensualExistente = true;
+        boton.textContent = "Actualizar indicadores mensuales";
+
+        mostrarMensaje(
+          "mensajeIndicadoresMensuales",
+          data.mensaje || "Indicadores mensuales guardados correctamente.",
+          "success"
+        );
+
+        const registro = data.registro || {};
+        actualizarEstadoMensual(
+          `Registro guardado · ${registro.operador || operador} · ${formatearFecha(registro.fechaRegistro)} ${registro.hora || ""}`,
+          "loaded"
+        );
+      } catch (error) {
+        mostrarMensaje(
+          "mensajeIndicadoresMensuales",
+          error.message,
+          "error"
+        );
+      } finally {
+        boton.disabled = false;
+        boton.textContent = indicadorMensualExistente
+          ? "Actualizar indicadores mensuales"
+          : "Guardar indicadores mensuales";
+      }
+    }
+
+    function limpiarFormularioMensual(limpiarMes = false) {
+      if (limpiarMes) {
+        $("mesIndicadores").value = "";
+      }
+
+      $("desequilibrioTension").value = "";
+      $("desequilibrioCorriente").value = "";
+      $("energiaActivaEntregada").value = "";
+      $("energiaReactivaEntregada").value = "";
+      $("informacionMensual").value = "";
+      $("mensajeIndicadoresMensuales").className = "notice";
+    }
+
+    function actualizarEstadoMensual(texto, tipo) {
+      const estado = $("estadoIndicadorMensual");
+      estado.textContent = texto;
+      estado.className = "monthly-status";
+
+      if (tipo) {
+        estado.classList.add(tipo);
+      }
+    }
+
+    function valorParaEntrada(valor) {
+      const numero = Number(valor);
+
+      if (!Number.isFinite(numero)) {
+        return "";
+      }
+
+      return String(numero).replace(".", ",");
     }
 
     function seleccionarUltimos30() {
